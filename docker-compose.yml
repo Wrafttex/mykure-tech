@@ -24,6 +24,9 @@ services:
       # Communicate on the example-com-shared network
       - mykure-tech-shared
 
+    depends_on:
+      - app-locker-service
+
   app-locker-db:
     image: postgres:latest # Fetch from DockerHub
     expose:
@@ -44,10 +47,6 @@ services:
     networks:
       - mykure-tech-shared
 
----
-volumes:
-  app-locker-db-volume: # Define the volume for the database
-
   app-locker-service:
     image: app-locker:latest
     build:
@@ -61,7 +60,6 @@ volumes:
       - app-locker-db
     networks:
       - mykure-tech-shared
-    depends_on:
-      - app-locker-service
 
-
+volumes:
+  app-locker-db-volume: # Define the volume for the database
