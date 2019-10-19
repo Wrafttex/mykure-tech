@@ -20,6 +20,47 @@ services:
       - "80:80"
       - "443:443"
 
+    depends_on: 
+      - app-locker-service
+
     networks:
       # Communicate on the example-com-shared network
       - mykure-tech-shared
+
+  app-locker-db:
+    image: postgres:latest  # Fetch from DockerHub
+    expose:
+      - 5432   # Expose port 5432 (default PostgreSQL port) so other services can use it
+    restart: always  # In case it crashes
+    volumes:
+      - app-locker-db-volume:/var/lib/postgresql/data  # Allow PostgreSQL to persist data on the host system (the volume is defined below)
+      # Replace the default seed.sql file with our own
+      - ./app-locker/dbscripts/seed.sql:/docker-entrypoint-initdb.d/seed.sql
+
+    # Provide environment variables
+    environment:
+      POSTGRES_USER: "joe"
+      POSTGRES_PASSWORD: "joe"
+      POSTGRES_DB: "app-locker-db"
+
+    # Join the shared network
+    networks:
+      - mykure-tech-shared
+
+    
+  app-locker-service:
+    image: app-locker:latest
+    build:
+      context: app-locker
+      dockerfile: ./Dockerfile
+    expose:
+      - 80
+    environment:
+      DB_CONNECTION_STRING: "host=app-locker-db;port=5432;database=app-locker-db;username=joe;password=joe"
+    depends_on:
+      - app-locker-db
+    networks:
+      - mykure-tech-shared
+
+volumes: 
+  app-locker-db-volume:
