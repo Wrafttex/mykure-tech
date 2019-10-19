@@ -1,0 +1,25 @@
+version: "3"
+
+networks:
+  mykure-tech-shared:
+
+services: 
+  reverse-proxy:
+    image: nginx:latest  # Download the latest official Nginx image from DockerHub
+    volumes:
+      # By default, Nginx assums that the nginx.conf file is in /etc/nginx. 
+      # Here, we say that our own nginx.conf (in this local directory) will replace it
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      # Here we simply allow the Docker container to access /etc/letsencrypt
+      - /etc/letsencrypt/:/etc/letsencrypt/
+
+    ports:
+      # A Docker container is the tiniest virtual machine in the world, and
+      # as such it has its own ports. Here, we map the host (Amazon server) ports
+      # 80 and 443 into the Docker containers ports 80 and 443.
+      - "80:80"
+      - "443:443"
+
+    networks:
+      # Communicate on the example-com-shared network
+      - mykure-tech-shared
